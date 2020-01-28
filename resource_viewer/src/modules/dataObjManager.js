@@ -1,13 +1,20 @@
 import React from "react";
 import * as CD from "../modules/constantData.js";
 
-function getElemenData(jsonData) {
-  let snapShopObj = jsonData["snapshot"];
+export const getSnapShotData = (jsonData) => {
+  return getElemenData(jsonData, "snapshot");
+}
+
+
+function getElemenData(jsonData, elementName) {
+  let snapShopObj = jsonData[elementName];
   return Object.keys(snapShopObj).map(key => {
     if (key === "element") return snapShopObj[key];
     else return null;
   });
 }
+
+
 
 function createInitialElementInfo(name, parent_id, id, depth) {
   return {
@@ -56,48 +63,96 @@ function getIDInfos(jsonData) {
 }
 
 function generateCardinalityInfo(jsonData) {
-    let min = jsonData["min"];
-    let max = jsonData["max"];       
+  let min = jsonData["min"];
+  let max = jsonData["max"];
 
-    if (typeof min === "number" && max) {
-        return min.toString() + ".." + max.toString();
-    } else return null;
+  if (typeof min === "number" && max) {
+    return min.toString() + ".." + max.toString();
+  } else return null;
+}
+
+function genereateReferenceType(typeDatas) {
+  let firstTypeData = typeDatas[0]
+  let resultTypeStr = firstTypeData.code;
+  let targetProfiles = []
+
+  if (firstTypeData.targetProfile instanceof Array) {
+    typeDatas.forEach(typeData =>
+      targetProfiles = targetProfiles.concat(typeData.targetProfile));
+  }
+  else {
+    targetProfiles = typeDatas.map(typeData => typeData.targetProfile)
+  }
+
+  targetProfiles = targetProfiles.map(target =>
+    target.split("/").slice(-1))
+  let joinedProfiles = targetProfiles.join(" | ")
+  resultTypeStr = resultTypeStr + "(" + joinedProfiles + ")";
+  return resultTypeStr
+}
+
+function generateValueXType(typeDatas, sourceElementInfo)
+{
+  sourceElementInfo.children = typeDatas.map(typeData => {
+    let childName =
+      sourceElementInfo.name.replace("[x]", "") +
+      typeData.code.charAt(0).toUpperCase() +
+      typeData.code.slice(1);
+    let childElementInfo = createInitialElementInfo(
+      childName,
+      sourceElementInfo.id,
+      sourceElementInfo.id + "." + childName,
+      sourceElementInfo.depth + 1
+    );
+    childElementInfo.type = typeData.code;
+    return childElementInfo;
+  });
+
+  return CD.MultiType;
+}
+
+function generateNormalTypeInfo(typeDatas, sourceElementInfo) {
+  let resultTypeStr = null;
+  let code = typeDatas[0].code
+
+  if (code === 'Reference') {
+    resultTypeStr = genereateReferenceType(typeDatas)
+  }
+  else if (typeDatas.length > 1) {
+    resultTypeStr = generateValueXType(typeDatas, sourceElementInfo)
+  }
+  else resultTypeStr = typeDatas[0].code;
+
+  return resultTypeStr;
+}
+
+function generateAbnormalTypeInfo(typeDatas, sourceElementInfo) {
+  let resultTypeStr = null;
+
+  if (sourceElementInfo.depth === 0) {
+    resultTypeStr = CD.DomainResourceType;
+  } else if (sourceElementInfo.name === CD.ReferenceRangeType) {
+    resultTypeStr = CD.ReferenceRangeType
+  } else resultTypeStr = "NO type Check!!";
+
+  return resultTypeStr;
 }
 
 function generateTypeInfo(jsonData, sourceElementInfo) {
   let typeDatas = jsonData["type"];
   let resultTypeStr = null;
 
-  if (sourceElementInfo.depth === 0 && typeDatas === undefined) {
-    resultTypeStr = CD.DomainResourceType;
-  } else if (typeDatas.length === 1) {
-    resultTypeStr = typeDatas[0].code;
-    if (typeDatas[0].hasOwnProperty("targetProfile")) {
-      let targetProfiles = typeDatas[0].targetProfile.map(target =>
-        target.split("/").slice(-1)
-      );
-      resultTypeStr = resultTypeStr + "(" + targetProfiles.join(" | ") + ")";
+  try {
+    if (typeDatas !== undefined) {
+      resultTypeStr = generateNormalTypeInfo(typeDatas, sourceElementInfo)
     }
-  } else if (typeDatas.length > 1) {
-    // name.endsWith("[x]")
-    sourceElementInfo.children = typeDatas.map(typeData => {
-      let childName =
-        sourceElementInfo.name.replace("[x]", "") +
-        typeData.code.charAt(0).toUpperCase() +
-        typeData.code.slice(1);
-      let childElementInfo = createInitialElementInfo(
-        childName,
-        sourceElementInfo.id,
-        sourceElementInfo.id + "." + childName,
-        sourceElementInfo.depth + 1
-      );
-
-      childElementInfo.type = typeData.code;
-      return childElementInfo;
-    });
-
-    resultTypeStr = CD.MultiType;
-  } else resultTypeStr = "NO type Check!!";
+    else {
+      resultTypeStr = generateAbnormalTypeInfo(typeDatas, sourceElementInfo)
+    }
+  } catch (error) {
+    console.log(jsonData)
+    throw error
+  }
 
   return resultTypeStr;
 }
@@ -126,13 +181,15 @@ function createDataItem(jsonData) {
 }
 
 const createDataObject = jsonData => {
-  var elementDataObj = getElemenData(jsonData);
+  // var snapShotDataObj = getElemenData(jsonData);
+  var snapShotDataObj = jsonData;
+
 
   let dataInfos = [];
   let dataDic = {};
 
-  Object.keys(elementDataObj).forEach(key => {
-    let values = elementDataObj[key];
+  Object.keys(snapShotDataObj).forEach(key => {
+    let values = snapShotDataObj[key];
 
     values.forEach(subValues => {
       let result = createDataItem(subValues);
@@ -159,7 +216,7 @@ const createDataObject = jsonData => {
 
   //   console.log(dataDic)
   return {
-    resrouceDataObj: dataDic["Patient"],
+    resrouceDataObj: Object.values(dataDic)[0],    //.dataDic["Patient"],
     dataInfos: dataInfos,
     divs: divs
   };

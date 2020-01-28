@@ -86,7 +86,6 @@ const gethierachyLineIMG = (dataSource, isParentLast, isLastNode) => {
 
 const getDataTypeIcon = dataType =>{
   let typeIMG = null
-  console.log(dataType)
   if(CD.PremitiveDataTypes.includes(dataType)) typeIMG = icon_primitive
   else if((CD.GlobalDataTypes.includes(dataType)) ) typeIMG = icon_datatype
   else if((CD.ElementTypes.includes(dataType)) ) typeIMG = icon_element  
@@ -104,10 +103,8 @@ const getDataTypeIcon = dataType =>{
 }
 
 const generateDataTypeIconTag = (dataType, idOddRow) =>{
-  
-  let dynamicStyle = !idOddRow ? {...style.dataTypeIconStyle, backgroundColor:oddRowBGColor} :style.dataTypeIconStyle
   let iconImg = getDataTypeIcon(dataType)  
-  let typeIconTag = <img src={iconImg} alt="." style={dynamicStyle} title={dataType}/>
+  let typeIconTag = <img src={iconImg} alt="." style={style.dataTypeIconStyle} title={dataType}/>
 
   return typeIconTag
 }
@@ -221,15 +218,15 @@ const createProfileGrid = sourceData => {
     fontFamily: "verdana",
     verticalAlign: "top"
   }
-
+  
   let tableBodyTags = convertDataToTRTags(sourceData);
   let resourceInfoTable = (
     <table style={tableStyle}>
       <tr style={headerTrStyle}>
-        <th style={{width:"250px"}}>Name</th>
+        <th style={{width:"230px"}}>Name</th>
         <th>Card.</th>
         <th style={{width:"100px"}}>Type</th>
-        <th style={{width:"200px"}}>Description</th>
+        <th style={{width:"350px"}}>Description</th>
       </tr>
       {tableBodyTags}
     </table>
@@ -237,27 +234,23 @@ const createProfileGrid = sourceData => {
   return resourceInfoTable;
 };
 
-const TreeViewer = () => {
-  var jsonDataObj = require("../resources/patient.profile.json");
-  // var treeDataSource = createDataObject(elementDataObj).dataInfos;
-  var treeDataSource = createDataObject(jsonDataObj).resrouceDataObj;
-  // console.log(treeDataSource)
+const ResourceViewer = ({resourceName, jsonData}) => {
   
-  return (    
-    <div>
-      {/* <div>{createDataObject(elementDataObj).divs}</div> */}
-      <br />
-      <br />
-      <div className="wrapper round-div">
-        <div >{'⭐️'} Structure </div>
-        <div>{createProfileGrid(treeDataSource)}</div>
-      </div>
-    </div>
-  );
+  // var jsonDataObj = require("../resources/patient.profile.json");
+  // var jsonDataObj = require("../resources/observation.profile.json");
+  
+
+
+  // var treeDataSource = createDataObject(elementDataObj).dataInfos;
+  var treeDataSource = createDataObject(jsonData).resrouceDataObj;
+  // console.log(treeDataSource)
+  var resourceInfoTable = createProfileGrid(treeDataSource)
+  
+  return resourceInfoTable;
 };
 
 
 
-export default TreeViewer;
+export default ResourceViewer;
 
 
