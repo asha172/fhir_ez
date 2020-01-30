@@ -2,24 +2,25 @@ import React from "react";
 import "./App.css";
 import { Route, Link } from "react-router-dom";
 import Home from "./components/Home";
-import ResourceInfo from "./components/ResourceInfo";
+import ResourceOverview from "./components/ResourceOverview";
 
 
 function App() {
   // return  <ResourceDetails1/>
   // return <ResourceDetails1/>
+  
   return (
     <div >
-      <ui>
+      <ul>
         <li>
-          <Link to='/ResourceInfo/patient'>Patient</Link>
+          <Link to='/ResourceOverview/patient'>Patient</Link>
         </li>
         <li>
-          <Link to='/ResourceInfo/encounter'>Encounter</Link>
+          <Link to='/ResourceOverview/encounter'>Encounter</Link>
         </li>
-      </ui>
+      </ul>
       <Route path="/" component={Home} exact={true} />
-      <Route path="/ResourceInfo/:resource" component={ResourceInfo} />
+      <Route path="/ResourceOverview/:resource" component={ResourceOverview} />
     </div>
   );
 }

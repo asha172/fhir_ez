@@ -1,12 +1,4 @@
-const DataTypes = {
-    Null: "Null",
-    Object: "Object",
-    Array: "Array",
-    String: "String",
-    Boolean: "Boolean",
-    Number: "Number",
-    Date: "Date"
-};
+
 
 function getTypeof(obj) {
     if (obj instanceof Array) return DataTypes.Array;

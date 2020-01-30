@@ -3,6 +3,7 @@ import ReactJson from 'react-json-view'
 
 
 const JsonViewer = ({jsonObj}) => {
+    console.log('JsonViewer App');
     const jsonData =  jsonObj
     return <ReactJson
     src={jsonData}
@@ -16,4 +17,4 @@ const JsonViewer = ({jsonObj}) => {
     displayObjectSize={false}/>
 }
 
-export default JsonViewer
+export default React.memo(JsonViewer)

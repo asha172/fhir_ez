@@ -5,7 +5,6 @@ export const getSnapShotData = (jsonData) => {
   return getElemenData(jsonData, "snapshot");
 }
 
-
 function getElemenData(jsonData, elementName) {
   let snapShopObj = jsonData[elementName];
   return Object.keys(snapShopObj).map(key => {
@@ -14,18 +13,24 @@ function getElemenData(jsonData, elementName) {
   });
 }
 
-
-
 function createInitialElementInfo(name, parent_id, id, depth) {
   return {
     id: id,
     parent_id: parent_id,
     name: name,
+    depth: depth,
+    alias: null,
     cardi: null,
     type: null,
     short: null,
-    depth: depth,
+    definition: null,
+    requirements: null,
+    comment: null,
+    constraint: [],
+    defaultValue: null,
+    mapping:[],
     children: []
+    
   };
 }
 
@@ -40,7 +45,7 @@ const excludeElement = [
   "modifierExtension"
 ];
 
-function getIDInfos(jsonData) {
+function generateIDInfos(jsonData) {
   let pathValue = jsonData["path"];
   let splitedPathStrs = pathValue.split(".");
   let parent_id = null;
@@ -111,7 +116,7 @@ function generateValueXType(typeDatas, sourceElementInfo)
   return CD.MultiType;
 }
 
-function generateNormalTypeInfo(typeDatas, sourceElementInfo) {
+function generateNormalType(typeDatas, sourceElementInfo) {
   let resultTypeStr = null;
   let code = typeDatas[0].code
 
@@ -126,7 +131,7 @@ function generateNormalTypeInfo(typeDatas, sourceElementInfo) {
   return resultTypeStr;
 }
 
-function generateAbnormalTypeInfo(typeDatas, sourceElementInfo) {
+function generateAbnormalType(typeDatas, sourceElementInfo) {
   let resultTypeStr = null;
 
   if (sourceElementInfo.depth === 0) {
@@ -138,16 +143,16 @@ function generateAbnormalTypeInfo(typeDatas, sourceElementInfo) {
   return resultTypeStr;
 }
 
-function generateTypeInfo(jsonData, sourceElementInfo) {
+function generateType(jsonData, sourceElementInfo) {
   let typeDatas = jsonData["type"];
   let resultTypeStr = null;
 
   try {
     if (typeDatas !== undefined) {
-      resultTypeStr = generateNormalTypeInfo(typeDatas, sourceElementInfo)
+      resultTypeStr = generateNormalType(typeDatas, sourceElementInfo)
     }
     else {
-      resultTypeStr = generateAbnormalTypeInfo(typeDatas, sourceElementInfo)
+      resultTypeStr = generateAbnormalType(typeDatas, sourceElementInfo)
     }
   } catch (error) {
     console.log(jsonData)
@@ -157,34 +162,93 @@ function generateTypeInfo(jsonData, sourceElementInfo) {
   return resultTypeStr;
 }
 
+function generateAlias(jsonData)
+{
+  if(!jsonData.hasOwnProperty('alias')) return null;
+  let alias = jsonData["alias"];
+  let genAlias = alias.join(', ')
+  return genAlias;
+}
+
 function createDataItem(jsonData) {
-  let idInfos = getIDInfos(jsonData);
-  if (excludeElement.includes(idInfos.name)) {
-    let exceptRule =
-      idInfos.name === "language" &&
-      idInfos.parent_id.indexOf("communication") > -1;
-    if (!exceptRule) return null;
+    let idInfos = generateIDInfos(jsonData);
+    if (excludeElement.includes(idInfos.name)) {
+      let exceptRule =
+        idInfos.name === "language" &&
+        idInfos.parent_id.indexOf("communication") > -1;
+      if (!exceptRule) return null;
+    }
+
+    let elementInfo = createInitialElementInfo(
+      idInfos.name,
+      idInfos.parent_id,
+      idInfos.id,
+      idInfos.depth
+    );
+
+    elementInfo.cardi = elementInfo.depth !== 0 ? generateCardinalityInfo(jsonData) : null;
+    elementInfo.type = generateType(jsonData, elementInfo);    
+    elementInfo.alias = generateAlias(jsonData)
+    elementInfo.constraint = generateConstraint(jsonData)
+    elementInfo.binding = generateBinding(jsonData)
+    elementInfo.mapping = generateMapping(jsonData)
+    
+    elementInfo.short = jsonData["short"];
+    elementInfo.definition = jsonData["definition"];
+    elementInfo.comment = jsonData["comment"];
+    elementInfo.requirements = jsonData["requirements"];
+
+    return elementInfo;
+}
+
+function generateConstraint(jsonData)
+{
+  if(!jsonData.hasOwnProperty('constraint')) return null;
+
+  return jsonData['constraint'].map(data =>
+    {
+      let key = data['key']
+      let human = data['human']
+      return {key:key, value:human}    
+    } )
+}
+
+function generateMapping(jsonData)
+{
+  let resultList = []
+  jsonData['mapping'].forEach(data =>
+    {
+      let key = data['identity']
+      let map = data['map']
+      if(map.toLowerCase() !== 'n/a') resultList.push({key:key, value:map});
+    })
+
+  return resultList
+}
+
+function generateBinding(jsonData){
+  if(!jsonData.hasOwnProperty('binding')) return null;
+  let bindings = jsonData["binding"];
+  
+  let strength = bindings.strength
+  let splitedValueSets = null;
+  if(bindings.hasOwnProperty('valueSet')) 
+    splitedValueSets= bindings.valueSet.split('/')
+  else if(bindings.hasOwnProperty('valueSetReference'))
+    splitedValueSets= bindings.valueSetReference.reference.split('/')
+  else{
+    throw new Error("binding property Error")
   }
+    
 
-  let elementInfo = createInitialElementInfo(
-    idInfos.name,
-    idInfos.parent_id,
-    idInfos.id,
-    idInfos.depth
-  );
-
-  elementInfo.cardi = elementInfo.depth !== 0 ? generateCardinalityInfo(jsonData) : null;
-  elementInfo.type = generateTypeInfo(jsonData, elementInfo);
-  elementInfo.short = jsonData["short"];
-
-  return elementInfo;
+  let valueSet = splitedValueSets[splitedValueSets.length-1]
+  return valueSet + "(" + strength  + ")";
 }
 
 const createDataObject = jsonData => {
+  console.log('createDataObject called')
   // var snapShotDataObj = getElemenData(jsonData);
   var snapShotDataObj = jsonData;
-
-
   let dataInfos = [];
   let dataDic = {};
 

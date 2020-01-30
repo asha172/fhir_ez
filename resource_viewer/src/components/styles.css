@@ -1,9 +1,7 @@
-
-
 .wrapper {
   margin: 0 auto;
-  padding: 1rem;
-  width: 800px;
+  padding: 10px;
+  width: 1300px;
 }
 
 .round-div {
@@ -11,6 +9,67 @@
   border-top-right-radius: 4px;
   border-bottom-left-radius: 4px;
   border-bottom-right-radius: 4px;
-  border: 1px solid #dddddd;
+  border-style: solid;
+  border-color:  #dddddd;
+  border-width: 1px 0px 1px 0px;
+}
 
+.snapshop-container {
+  width:100%;
+  overflow: hidden;    
+}
+
+.snapshop-left {
+  float: left;
+  width: 55%;  
+}
+
+.snapshop-right {
+  /* width:50%; */
+  height: inherit;
+  padding-left: 20px;
+  overflow: hidden;  
+}
+
+.details-popup {
+  border-style: solid;
+  border-color:  #dddddd;
+  border-width: 1px 0px 1px 0px;
+  padding-left: 7px;
+  height: inherit;
+  font-size: 11px;
+  font-family: Verdana;
+  
+}
+
+.details-container {
+  border-style: dashed;
+  border-color:  darkgray;
+  
+  margin-top: 2px;
+}
+
+.details-value-p {
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+.resourceinfo-table {
+  border: 0px #F0F0F0 solid;
+  font-size: 11px;
+  font-family: verdana;
+  vertical-align: top;
+  border-collapse: collapse;
+}
+.resourceinfo-header {
+  border: 0px #F0F0F0 solid;
+  border-width: 1px 0px;
+  font-size: 11px;
+  font-family: verdana;
+  vertical-align: top;
+  border-collapse: collapse;
+}
+
+.nav-tabs {
+  border-bottom: 0px;
 }
