@@ -30,7 +30,7 @@ const ResourceDetailSPopup = ({dataSource}) => {
     let keysLen = keysList.length
 
     return (
-        <div >{            
+        <div className='details-outpan' >{            
             keysList.map((key, idx) => {    
                 
                 let title = detialsDispalyItems[key];

@@ -16,7 +16,7 @@
 
 .snapshop-container {
   width:100%;
-  overflow: hidden;    
+  overflow: hidden;   
 }
 
 .snapshop-left {
@@ -42,11 +42,17 @@
   
 }
 
+.details-outpan {
+  box-shadow: 1px 5px 10px -2px #ccc;  /* Opera 10.5, IE 9, Firefox 4+, Chrome 6+, iOS 5 */
+  margin-right: 10px;
+  margin-bottom : 10px;
+}
+
 .details-container {
   border-style: dashed;
-  border-color:  darkgray;
-  
+  border-color:  darkgray;  
   margin-top: 2px;
+  padding-left: 5px;   
 }
 
 .details-value-p {
@@ -73,3 +79,5 @@
 .nav-tabs {
   border-bottom: 0px;
 }
+
+
