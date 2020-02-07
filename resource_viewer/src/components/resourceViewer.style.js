@@ -1,9 +1,21 @@
 export const trStyle = {
     verticalAlign: "top",
     textAlign : "left",
-    backgroundColor: "white",
+    // backgroundColor: "black",
     border: "0px #F0F0F0 solid",
-    padding: "0px 4px 0px 4px"    
+    padding: "0px 4px 0px 4px",
+    '&:hover': {
+        backgroundColor: "#CCE7E7"
+      },    
+  };
+
+export const trStyle1 = {
+    verticalAlign: "top",
+    textAlign : "left",
+    // backgroundColor: "#CCE7E7",
+    border: "1px #F0F0F0 solid",
+    padding: "0px 4px 0px 4px",
+   
   };
   
 export const tdStyle = {

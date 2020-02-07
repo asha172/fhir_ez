@@ -1,11 +1,12 @@
-import React, { useState, useCallback } from "react";
+import React from "react";
+import * as style from "./resourceViewer.style.js";
 import "./styles.css";
 
-import ResouceInfoList from "./ResourceInfoList";
+import ResouceInfoList from "./ResourceInfoTable";
 
 const ResourceViewer = ({ dataSource, onClick }) => {
+  console.log('ResourceViewer Rendered') 
 
-  console.log('ResourceViewer Rendered')
   return (
     <table  key='1' className="resourceinfo-table">
       <thead>

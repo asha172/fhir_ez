@@ -1,45 +1,76 @@
-import React, { useState, useCallback, useMemo } from "react";
-import ResourceViewer from "./ResourceViewer";
+import React, { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { Tabs, Tab } from "react-bootstrap";
 import JsonViewer from "./JsonViewer";
 import { getSnapShotData } from "../modules/dataObjManager";
 import createDataObject from "../modules/dataObjManager";
 import ResourceDetailsPopup from "./ResourceDetailSPopup";
-import "./styles.css";
+  import "./styles.css";
+  import ResourceInfoTable from "./ResourceInfoTable";
 
 const ResourceOverview = ({ match }) => {
   console.log("ResourceOverview")
-  const [selectRow, setSelectRow] = useState(null);
-
+  const [selectedRow, setSelectedRow] = useState(null);
   const calledResource = match.params.resource;
   var jsonDataObj = useMemo(() => require( "../resources/" +  calledResource.toLowerCase() + ".profile.json"), [calledResource]);
 
   const snapShot = useMemo(() => getSnapShotData(jsonDataObj), [jsonDataObj]);   
   const dataSource = useMemo(()=> createDataObject(snapShot).resrouceDataObj, [snapShot]);
 
+  
+  const resourceTableEL = useRef(null); 
 
-  const onClick = useCallback(e => {
+ 
+  function ShowDetailsPopup(e, dataSource) {
     
     let selectedRowID = e.currentTarget.id;
     let splitedIDs = selectedRowID.split(".");
-    // let depth = splitedIDs.length;
 
     const getSelectedRowData = (id, dataSource) => {
       for (let dataItem of dataSource) {
-        if (dataItem.name === id) return dataItem;
+        if (dataItem.name === id)
+          return dataItem;
       }
     };
 
     let destSourceData = dataSource;
-
     if (splitedIDs.length > 1) {
       for (let i = 1; i < splitedIDs.length; i++) {
         let splitedId = splitedIDs[i];
         destSourceData = getSelectedRowData(splitedId, destSourceData.children);
       }
     }
-    setSelectRow(destSourceData);
+    setSelectedRow(destSourceData);
+  }
+  
+  const [detailsPopupTop, setDetailsPopupTop] = useState(20);
+
+  const [rowPopupTop, setRowPopupTop] = useState(0);
+
+  const ResourceRowOnClick = useCallback(e => {
+    ShowDetailsPopup(e, dataSource);
+    let refTop =  e.currentTarget.offsetTop
+    setRowPopupTop(refTop)
+    
   }, [dataSource]);
+
+  // const detailsPopupEL = useRef(null);  
+  
+  const detailsPopupEL = useCallback(node => {
+    if (node !== null) {
+    
+    let detailsPopupBottom = rowPopupTop + node.offsetHeight;
+    let limitBottom = resourceTableEL.current.offsetHeight;
+    let popupTop = 0;
+    if(detailsPopupBottom > limitBottom){
+      popupTop = rowPopupTop - (detailsPopupBottom - limitBottom)
+    }
+    else{
+      popupTop = rowPopupTop
+    }
+    
+    setDetailsPopupTop(popupTop)
+    }
+  },[rowPopupTop]);
 
   return (
     <div>
@@ -59,15 +90,14 @@ const ResourceOverview = ({ match }) => {
             id="uncontrolled-tab-example">
             <Tab eventKey="structure" title="Structure">
               <div className="snapshop-container">
-                <div className="snapshop-left">
-                  <ResourceViewer
-                    resourceName={calledResource} 
+                <div ref={resourceTableEL} className="snapshop-left" >
+                  <ResourceInfoTable               
                     dataSource={dataSource}
-                    onClick={onClick}/>
+                    onClick={ResourceRowOnClick}/>
                 </div>
                 <div className="snapshop-right">
-                  <div className="details-popup">
-                    <ResourceDetailsPopup dataSource={selectRow}/>
+                  <div ref={detailsPopupEL} className="details-popup" style={{marginTop: `${detailsPopupTop}px`}}>
+                    <ResourceDetailsPopup dataSource={selectedRow}/>
                   </div>
                 </div>
               </div>
@@ -86,3 +116,5 @@ const ResourceOverview = ({ match }) => {
 };
 
 export default React.memo(ResourceOverview);
+
+
