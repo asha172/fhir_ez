@@ -4,7 +4,7 @@ import "./styles.css";
 import ResourceInfoItem from "./ResourceInfoItem";
 
 const ResourceInfoTable = ({dataSource, onClick}) => {
-
+  console.log("ResourceInfoTable rendered")
   const generateTrTag = (
     dataSource,
     isParentLast = false,
@@ -57,4 +57,4 @@ const ResourceInfoTable = ({dataSource, onClick}) => {
   );
 };
 
-export default ResourceInfoTable;
+export default React.memo(ResourceInfoTable);

@@ -24,4 +24,6 @@ const ResourceViewer = ({ dataSource, onClick }) => {
   );
 };
 
-export default React.memo(ResourceViewer);
+// export default React.memo(ResourceViewer);
+export default ResourceViewer;
+

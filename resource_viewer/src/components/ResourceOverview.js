@@ -9,16 +9,25 @@ import ResourceDetailsPopup from "./ResourceDetailSPopup";
 
 const ResourceOverview = ({ match }) => {
   console.log("ResourceOverview")
-  const [selectedRow, setSelectedRow] = useState(null);
-  const calledResource = match.params.resource;
-  var jsonDataObj = useMemo(() => require( "../resources/" +  calledResource.toLowerCase() + ".profile.json"), [calledResource]);
+  
+  // 생성자와 같은 기능 but... lifeCycle 상 렌더링 된 후에 호출되므로 부작용 생각해봐야 함.
+  useEffect(() => {    
+    setSelectedRow(null)
+    setRowPopupTop(0)
+  }, [match]);
 
+  const calledResource = match.params.resource;
+
+  const [selectedRow, setSelectedRow] = useState(null);
+  const [detailsPopupTop, setDetailsPopupTop] = useState(20);
+  const [rowPopupTop, setRowPopupTop] = useState(0);  
+  
+  let jsonDataObj = useMemo(() => require( "../resources/" +  calledResource.toLowerCase() + ".profile.json"), [calledResource]);
   const snapShot = useMemo(() => getSnapShotData(jsonDataObj), [jsonDataObj]);   
   const dataSource = useMemo(()=> createDataObject(snapShot).resrouceDataObj, [snapShot]);
 
-  
+    
   const resourceTableEL = useRef(null); 
-
  
   function ShowDetailsPopup(e, dataSource) {
     
@@ -42,10 +51,6 @@ const ResourceOverview = ({ match }) => {
     setSelectedRow(destSourceData);
   }
   
-  const [detailsPopupTop, setDetailsPopupTop] = useState(20);
-
-  const [rowPopupTop, setRowPopupTop] = useState(0);
-
   const ResourceRowOnClick = useCallback(e => {
     ShowDetailsPopup(e, dataSource);
     let refTop =  e.currentTarget.offsetTop
@@ -53,7 +58,6 @@ const ResourceOverview = ({ match }) => {
     
   }, [dataSource]);
 
-  // const detailsPopupEL = useRef(null);  
   
   const detailsPopupEL = useCallback(node => {
     if (node !== null) {
